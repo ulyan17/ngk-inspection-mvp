@@ -1,0 +1,37 @@
+name: ngk-inspection-mvp
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Установка
+        run: pip install -e .
+
+      - name: Симулятор работает (тесты ядра)
+        run: python -m pytest tests/test_sim_core.py
+
+      - name: Задания C1–C3
+        run: python -m pytest tests/test_c1_mission.py tests/test_c2_inspector.py tests/test_c3_report.py
+
+      - name: Демо-миссия и формат отчёта
+        if: always()
+        run: |
+          python -m ngk_sim run --seed 19 --no-viz
+          python -m ngk_sim validate out/seed_19/report.json
+
+      - name: Сохранить результаты миссии
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mission-out
+          path: out/

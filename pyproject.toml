@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ngk-inspection-mvp"
+version = "1.0.0"
+description = "Учебный инспекционный MVP для объекта НГК: симулятор без ROS, задания C1–C3 и ворота Go/No-Go"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.23", "matplotlib>=3.6", "pytest>=7"]
+
+[tool.setuptools]
+packages = ["ngk_sim", "student"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,15 @@
+{
+  "_comment": "Пороги ворот Go/No-Go. must — обязательные (провал любого = не Go), should — желательные.",
+  "must": {
+    "ex_zone_violations":   {"op": "<=", "value": 0},
+    "coverage":             {"op": ">=", "value": 0.9},
+    "anomaly_detected":     {"op": "==", "value": true},
+    "false_alarms":         {"op": "<=", "value": 1},
+    "manual_interventions": {"op": "<=", "value": 0},
+    "crashed":              {"op": "==", "value": false}
+  },
+  "should": {
+    "reading_accuracy":     {"op": ">=", "value": 0.8},
+    "mission_time_s":       {"op": "<=", "value": 360}
+  }
+}
