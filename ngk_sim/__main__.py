@@ -5,6 +5,7 @@
     python -m ngk_sim accept --seeds 11 22 33 # приёмочный прогон → out/accept/gate_kpi.md
     python -m ngk_sim validate out/seed_1/report.json
     python -m ngk_sim world                   # нарисовать карту объекта в world.png
+    python -m ngk_sim record --out mission.mp4  # видео миссии без окна
 """
 from __future__ import annotations
 
@@ -36,6 +37,12 @@ def main(argv=None) -> int:
     v = sub.add_parser("validate", help="проверить формат report.json")
     v.add_argument("path")
 
+    rc = sub.add_parser("record", help="записать миссию в видео (mp4 или gif)")
+    rc.add_argument("--seed", type=int, default=19)
+    rc.add_argument("--impl", default=os.environ.get("NGK_IMPL", "student"))
+    rc.add_argument("--out", default="mission.mp4")
+    rc.add_argument("--fps", type=int, default=20)
+
     w = sub.add_parser("world", help="нарисовать карту объекта")
     w.add_argument("--out", default="world.png")
 
@@ -60,6 +67,10 @@ def main(argv=None) -> int:
                 print("  ·", e)
             return 1
         print("✅ Отчёт корректен")
+        return 0
+    if args.cmd == "record":
+        from .record import record
+        print(f"Видео сохранено: {record(args.seed, args.out, impl=args.impl, fps=args.fps)}")
         return 0
     if args.cmd == "world":
         from .viz import use_headless

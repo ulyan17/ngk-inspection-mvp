@@ -4,6 +4,8 @@
 
 **Без ROS.** Всё работает на чистом Python под Windows, macOS и Linux. Имена топиков и API навигатора — как в ROS 2 / Nav2, поэтому дома код переносится на настоящий стек (папка `ros2_homework/`).
 
+![Миссия робота: эталонное решение на seed 19](docs/mission.gif)
+
 ![Как всё работает](docs/how-it-works.png)
 
 📘 **Лекция:** [docs/LECTURE.md](docs/LECTURE.md) · 🛠 **Практика пошагово:** [docs/PRACTICE.md](docs/PRACTICE.md) · 🗺 [карта объекта](docs/world.png)
@@ -123,4 +125,5 @@ KPI считает симулятор **по эталону**, а не по ва
 | Нет интернета | преподаватель раздаст папку `wheels/`: `pip install --no-index --find-links wheels numpy matplotlib pytest` |
 | Окно анимации пустое или не открывается | `--no-viz`, результаты в `out/seed_19/` |
 | Анимация медленная | `--speed 5` (перерисовка реже) |
+| Нужно видео без окна | `python -m ngk_sim record --out mission.mp4` (нужен ffmpeg) или `--out mission.gif` |
 | `ModuleNotFoundError: student` | запускайте команды из корня репозитория |
