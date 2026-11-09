@@ -45,9 +45,11 @@ class Sim:
         self.t = 0.0
         self.pose = Pose(world.dock_pose.x, world.dock_pose.y, 0.0)
         self.grid = GridMap(OBSTACLES, keepout=[EX_ZONE])
+        self.grid_no_keepout = GridMap(OBSTACLES)   # если keepout-фильтр отключён (так делать нельзя)
         self.blockage_active = truth.blockage_until_s > 0
         if self.blockage_active:
             self.grid.set_dynamic([BLOCKAGE])
+            self.grid_no_keepout.set_dynamic([BLOCKAGE])
         self.rng = np.random.default_rng(truth.seed * 104729 + 7)
         self.prng = random.Random(truth.seed * 31 + 5)
         # статистика для KPI
@@ -85,6 +87,7 @@ class Sim:
         if self.blockage_active and self.t >= self.truth.blockage_until_s:
             self.blockage_active = False
             self.grid.set_dynamic([])
+            self.grid_no_keepout.set_dynamic([])
         if EX_ZONE.contains(self.pose.x, self.pose.y):
             self.ex_zone_steps += 1
         self.bus.publish(Topics.POSE, Pose(self.pose.x, self.pose.y, self.pose.theta))
@@ -115,12 +118,14 @@ class SimNavigator:
         p = self.sim.pose
         return Pose(p.x, p.y, p.theta)
 
-    def goToPose(self, pose: Pose) -> bool:
+    def goToPose(self, pose: Pose, keepout: bool = True) -> bool:
+        """keepout=False — планировать, игнорируя Ex-зону (аналог отключённого keepout-фильтра Nav2)."""
         self._goal = Pose(pose.x, pose.y, pose.theta)
         self._started = self.sim.t
         self._active = True
         self._result = TaskResult.UNKNOWN
-        path = self.sim.grid.plan((self.sim.pose.x, self.sim.pose.y), (pose.x, pose.y))
+        grid = self.sim.grid if keepout else self.sim.grid_no_keepout
+        path = grid.plan((self.sim.pose.x, self.sim.pose.y), (pose.x, pose.y))
         if path is None:
             self._path = []
             self._fail_at = self.sim.t + NO_PATH_DELAY_S

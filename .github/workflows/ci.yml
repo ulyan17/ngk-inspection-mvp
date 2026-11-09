@@ -5,40 +5,8 @@ on:
   pull_request:
 
 jobs:
-  code:
-    name: Код и тесты
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Установка
-        run: pip install -e .
-
-      - name: Симулятор работает (тесты ядра)
-        run: python -m pytest tests/test_sim_core.py
-
-      - name: Задания C1–C3
-        run: python -m pytest tests/test_c1_mission.py tests/test_c2_inspector.py tests/test_c3_report.py
-
-      - name: Демо-миссия и формат отчёта
-        if: always()
-        run: |
-          python -m ngk_sim run --seed 19 --no-viz
-          python -m ngk_sim validate out/seed_19/report.json
-
-      - name: Сохранить результаты миссии
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mission-out
-          path: out/
-
-  submission:
-    name: Сдача (submission/)
+  lesson:
+    name: "Занятие: протокол ворот (submission/)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,5 +14,40 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -e .
-      - name: Отчёты команды заполнены
+      - name: Протокол ворот и сводки compare заполнены
         run: python -m ngk_sim check-submission
+
+  homework-code:
+    name: "ДЗ: код и тесты (student/)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - name: Симулятор и подрядчики (тесты ядра)
+        run: python -m pytest tests/test_sim_core.py tests/test_variants.py tests/test_submission_check.py
+      - name: Задания C1–C3
+        run: python -m pytest tests/test_c1_mission.py tests/test_c2_inspector.py tests/test_c3_report.py
+      - name: Демо-миссия и формат отчёта
+        if: always()
+        run: |
+          python -m ngk_sim run --seed 19 --no-viz
+          python -m ngk_sim validate out/seed_19/report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mission-out
+          path: out/
+
+  homework-docs:
+    name: "ДЗ: документы (homework/)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - run: python -m ngk_sim check-submission --homework

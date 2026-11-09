@@ -167,7 +167,7 @@ def accept(seeds: list[int], impl: str = "student", out_dir: str = "out/accept",
               f"Воспроизводимость: {sum(not r['kpi']['crashed'] for r in runs)} из {len(runs)} прогонов без сбоев", "",
               "**Автоматическая проверка:** " + ("все обязательные критерии выполнены на всех seed."
                                                  if all_must else "есть невыполненные обязательные критерии."),
-              "", "Решение (Go / Kill / Hold / Recycle) и обоснование — в submission/gate_review.md.", ""]
+              "", "Решение (Go / Kill / Hold / Recycle) и обоснование — в homework/gate_review.md.", ""]
     lines.append("<details><summary>Истина (раскрывается после прогона)</summary>\n")
     for s, r in zip(seeds, runs):
         t = r["kpi"]["truth"]
@@ -180,8 +180,8 @@ def accept(seeds: list[int], impl: str = "student", out_dir: str = "out/accept",
         f.write("\n".join(lines))
     print("\n".join(lines[:len(keys) + 8]))
     print(f"\n📄 Таблица для ворот: {path}")
-    if copy_to_submission and os.path.isdir("submission"):
+    if copy_to_submission and os.path.isdir("homework"):
         import shutil
-        shutil.copy(path, os.path.join("submission", "gate_kpi.md"))
-        print("📄 Копия для сдачи: submission/gate_kpi.md")
+        shutil.copy(path, os.path.join("homework", "gate_kpi.md"))
+        print("📄 Копия для сдачи: homework/gate_kpi.md")
     return {"runs": runs, "all_must": all_must, "path": path}

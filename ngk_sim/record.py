@@ -65,6 +65,8 @@ def record(seed: int, out: str, impl: str = "student", fps: int = 20, step: int 
     ax.add_patch(blk)
     (trail,) = ax.plot([], [], "-", color=COL["route"], lw=1.8, alpha=0.8)
     (robot,) = ax.plot([], [], "^", ms=14, color="#F7F4EE", mec="#FF6B1A", mew=2)
+    (exdots,) = ax.plot([], [], "o", ms=7, color="#FF3B30", mec="#F7F4EE", mew=1)
+    from .world import EX_ZONE
     team = kpi["team"]
     fig.text(0.04, 0.95, f"ngk_sim · {team} · seed {seed}", color=COL["text"], fontsize=15, weight="bold")
     tclock = fig.text(0.04, 0.915, "", color="#9AA4B2", fontsize=11, family="monospace")
@@ -86,6 +88,8 @@ def record(seed: int, out: str, impl: str = "student", fps: int = 20, step: int 
     def draw(i):
         t, x, y, n, th, inf, st, lg, blocked = frames[i]
         trail.set_data(all_x[:n], all_y[:n])
+        bx = [(a, b) for a, b in zip(all_x[:n], all_y[:n]) if EX_ZONE.contains(a, b)]
+        exdots.set_data([a for a, _ in bx], [b for _, b in bx])
         robot.set_data([x], [y])
         blk.set_visible(blocked)
         tclock.set_text(f"t = {t:6.1f} с")

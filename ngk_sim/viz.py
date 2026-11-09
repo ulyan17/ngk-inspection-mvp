@@ -137,6 +137,11 @@ def save_map(path: str, sim, bus, last_results: dict, title: str) -> None:
         ax.text(b.x0, b.y0 - 0.9, f"техника до t={sim.truth.blockage_until_s:.0f} с", color="#FF6B1A", fontsize=7)
     poses = bus.messages(Topics.POSE)
     ax.plot([p.x for p in poses], [p.y for p in poses], "-", color=COL["route"], lw=1.6, alpha=0.8)
+    bad = [p for p in poses if EX_ZONE.contains(p.x, p.y)]
+    if bad:   # заезды в Ex-зону — красным, их должно быть видно издалека
+        ax.plot([p.x for p in bad], [p.y for p in bad], "o", ms=7, color="#FF3B30", mec="#F7F4EE", mew=1)
+        ax.text(EX_ZONE.x0 + 0.3, EX_ZONE.y0 + 0.6, f"ЗАЕЗД В Ex-ЗОНУ · {len(bad)} шагов", color="#FF3B30", fontsize=10,
+                weight="bold", bbox=dict(boxstyle="round,pad=0.3", fc="#0E1116", ec="#FF3B30"))
     for cid, dot in dots.items():
         r = last_results.get(cid)
         dot.set_color(STATUS_COL.get(r.status, "#5B6472") if r else "#5B6472")

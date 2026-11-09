@@ -13,7 +13,7 @@ from .world import CHECKPOINTS
 ACCURACY_TOL_BAR = 0.15
 
 LABELS = {
-    "ex_zone_violations": "Нарушения Ex-зон",
+    "ex_zone_violations": "Нарушения Ex-зон, шагов",
     "coverage": "Покрытие точек контроля",
     "anomaly_detected": "Аномалия найдена",
     "false_alarms": "Ложные тревоги",

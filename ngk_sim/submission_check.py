@@ -1,10 +1,15 @@
-"""Проверка папки submission/ перед сдачей:  python -m ngk_sim check-submission"""
+"""Проверка документов перед сдачей.
+
+    python -m ngk_sim check-submission              # занятие: submission/ (протокол ворот)
+    python -m ngk_sim check-submission --homework   # домашнее задание: homework/
+"""
 from __future__ import annotations
 
 import os
 import re
 
-DECISIONS = ["GO", "GO С УСЛОВИЯМИ", "HOLD", "RECYCLE", "KILL"]
+VENDORS = ["А «Быстрый обход»", "Б «Надёжный»", "В «Сбалансированный»", "Г «Оптимальный маршрут»"]
+BLANK = "______"
 
 
 def _read(path):
@@ -15,52 +20,86 @@ def _read(path):
         return None
 
 
-def check(folder: str = "submission") -> list[tuple[bool, str]]:
-    out = []
+def _field(text, label):
+    """Текст после **label:** до следующего пустого абзаца с **…**, без заглушек."""
+    m = re.search(r"\*\*" + re.escape(label) + r"[^*]*:\*\*(.*?)(?=\n\*\*|\n### |\n## |\Z)", text, re.S)
+    return (m.group(1).replace(BLANK, "").strip() if m else "")
+
+
+def _ticked(text):
+    return re.findall(r"- \[[xXхХ]\] \*\*([^*]+)\*\*", text)
+
+
+def _team(folder, out):
     team = _read(os.path.join(folder, "TEAM.md"))
     if team is None:
-        out.append((False, "нет submission/TEAM.md"))
-    else:
-        m = re.search(r"\*\*Название команды:\*\*\s*(.+)", team)
-        name_ok = bool(m) and "______" not in m.group(1).split("(")[0]
-        people = [ln for ln in team.splitlines() if ln.startswith("|") and "______" not in ln
-                  and not ln.startswith("|---") and "Роль" not in ln and ln.count("|") >= 4
-                  and ln.split("|")[2].strip() not in ("", "_(четвёртый участник, если есть)_")]
-        out.append((name_ok, "TEAM.md: название команды"))
-        out.append((len(people) >= 2, f"TEAM.md: участники ({len(people)} заполнено, нужно ≥ 2)"))
+        out.append((False, f"нет {folder}/TEAM.md"))
+        return
+    m = re.search(r"\*\*Название команды:\*\*\s*(.+)", team)
+    out.append((bool(m) and BLANK not in m.group(1).split("(")[0], "TEAM.md: название команды"))
+    people = [ln for ln in team.splitlines() if ln.startswith("|") and BLANK not in ln and not ln.startswith("|---")
+              and "Роль" not in ln and ln.count("|") >= 4
+              and ln.split("|")[2].strip() not in ("", "_(четвёртый участник, если есть)_")]
+    out.append((len(people) >= 2, f"TEAM.md: участники ({len(people)} заполнено, нужно ≥ 2)"))
 
-    kpi = _read(os.path.join(folder, "kpi_table.md"))
-    if kpi is None:
-        out.append((False, "нет submission/kpi_table.md"))
-    else:
-        rows = [ln for ln in kpi.splitlines() if re.match(r"\|\s*\d+\s*\|", ln)]
-        filled = [r for r in rows if sum(1 for c in r.split("|")[3:8] if c.strip()) >= 3]
-        out.append((len(filled) >= 3, f"kpi_table.md: заполнено строк с KPI — {len(filled)}, нужно ≥ 3"))
 
-    gk = _read(os.path.join(folder, "gate_kpi.md"))
-    out.append((gk is not None and "seed" in (gk or ""),
-                "gate_kpi.md: таблица приёмки (создаётся командой python -m ngk_sim accept)"))
+def _risks(text, out, fname):
+    sec = re.search(r"## \d\. [^\n]*рис[^\n]*\n(.*?)\n## ", text, re.S | re.I)
+    rows = [ln for ln in (sec.group(1) if sec else "").splitlines()
+            if ln.startswith("|") and not ln.startswith("|---") and "Риск" not in ln and len(ln.split("|")[1].strip()) > 3]
+    out.append((len(rows) >= 2, f"{fname}: рисков заполнено — {len(rows)}, нужно 2"))
 
-    gr = _read(os.path.join(folder, "gate_review.md"))
-    if gr is None:
-        out.append((False, "нет submission/gate_review.md"))
-    else:
-        ticked = re.findall(r"- \[[xXхХ]\] \*\*([^*]+)\*\*", gr)
-        out.append((len(ticked) == 1, f"gate_review.md: отмечено решений — {len(ticked)}, нужно ровно 1"))
-        sec = re.search(r"## 3\. Обоснование(.*?)## 4\.", gr, re.S)
-        text = re.sub(r"3–5 предложений:.*?\n", "", sec.group(1)) if sec else ""
-        text = text.replace("______", "").strip()
-        out.append((len(text) >= 150, f"gate_review.md: обоснование ({len(text)} символов, нужно ≥ 150)"))
-        sec2 = re.search(r"## 4\..*?\n(.*?)## 5\.", gr, re.S)
-        risk_rows = [ln for ln in (sec2.group(1) if sec2 else "").splitlines()
-                     if ln.startswith("|") and not ln.startswith("|---") and "Риск" not in ln
-                     and len(ln.split("|")[1].strip()) > 3]
-        out.append((len(risk_rows) >= 2, f"gate_review.md: рисков заполнено — {len(risk_rows)}, нужно 2"))
+
+def check(folder: str = "submission") -> list[tuple[bool, str]]:
+    out: list[tuple[bool, str]] = []
+    _team(folder, out)
+    out.append((_read(os.path.join(folder, "compare.md")) is not None,
+                "compare.md: сводка по 5 сценариям (python -m ngk_sim compare)"))
+    out.append((_read(os.path.join(folder, "compare_30.md")) is not None,
+                "compare_30.md: надёжность на 30 сценариях (python -m ngk_sim compare --runs 30)"))
+    pr = _read(os.path.join(folder, "gate_protocol.md"))
+    if pr is None:
+        out.append((False, f"нет {folder}/gate_protocol.md"))
+        return out
+    parts = re.split(r"\n### ", pr)
+    for v in VENDORS:
+        sec = next((p for p in parts if p.startswith(v)), "")
+        sec = sec.split("\n## ")[0]
+        ok_dec = len(_ticked(sec)) == 1
+        meas, why, fix = _field(sec, "Измерения показали"), _field(sec, "Почему"), _field(sec, "Что подрядчику исправить")
+        out.append((ok_dec and len(meas) >= 20 and len(why) >= 30 and len(fix) >= 10,
+                    f"Подрядчик {v}: решение ({len(_ticked(sec))} отмечено), измерения, причина, что исправить"))
+    pilot = re.search(r"## 3\.(.*?)\n## 4\.", pr, re.S)
+    p_text = pilot.group(1) if pilot else ""
+    out.append((len(_ticked(p_text)) == 1, f"Кандидат на пилот: отмечено {len(_ticked(p_text))}, нужно ровно 1"))
+    just = _field(p_text, "Условия допуска и обоснование")
+    out.append((len(just) >= 120, f"Обоснование выбора ({len(just)} символов, нужно ≥ 120)"))
+    _risks(pr, out, "gate_protocol.md")
+    q5 = re.search(r"## 5\.[^\n]*\n(.*?)\n## 6\.", pr, re.S)
+    q5t = re.sub(r"Согласны ли вы.*?\n", "", q5.group(1) if q5 else "").replace(BLANK, "").strip()
+    out.append((len(q5t) >= 60, f"Вопрос к воротам ({len(q5t)} символов, нужно ≥ 60)"))
     return out
 
 
-def main(folder: str = "submission") -> int:
-    res = check(folder)
+def check_homework(folder: str = "homework") -> list[tuple[bool, str]]:
+    out: list[tuple[bool, str]] = []
+    kpi = _read(os.path.join(folder, "kpi_table.md"))
+    rows = [ln for ln in (kpi or "").splitlines() if re.match(r"\|\s*\d+\s*\|", ln)]
+    filled = [r for r in rows if sum(1 for c in r.split("|")[3:8] if c.strip()) >= 3]
+    out.append((len(filled) >= 3, f"kpi_table.md: заполнено строк с KPI — {len(filled)}, нужно ≥ 3"))
+    gk = _read(os.path.join(folder, "gate_kpi.md"))
+    out.append((gk is not None and "seed" in (gk or ""), "gate_kpi.md: приёмка (python -m ngk_sim accept --seeds …)"))
+    gr = _read(os.path.join(folder, "gate_review.md")) or ""
+    out.append((len(_ticked(gr)) == 1, f"gate_review.md: отмечено решений — {len(_ticked(gr))}, нужно ровно 1"))
+    sec = re.search(r"## 3\. Обоснование(.*?)## 4\.", gr, re.S)
+    text = re.sub(r"3–5 предложений:.*?\n", "", sec.group(1) if sec else "").replace(BLANK, "").strip()
+    out.append((len(text) >= 150, f"gate_review.md: обоснование ({len(text)} символов, нужно ≥ 150)"))
+    _risks(gr, out, "gate_review.md")
+    return out
+
+
+def main(folder: str | None = None, homework: bool = False) -> int:
+    res = check_homework(folder or "homework") if homework else check(folder or "submission")
     for ok, text in res:
         print(("✅ " if ok else "❌ ") + text)
     good = all(ok for ok, _ in res)
