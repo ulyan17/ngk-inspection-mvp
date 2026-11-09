@@ -53,14 +53,15 @@ def _risks(text, out, fname):
 def check(folder: str = "submission") -> list[tuple[bool, str]]:
     out: list[tuple[bool, str]] = []
     _team(folder, out)
-    out.append((_read(os.path.join(folder, "compare.md")) is not None,
-                "compare.md: сводка по 5 сценариям (python -m ngk_sim compare)"))
-    out.append((_read(os.path.join(folder, "compare_30.md")) is not None,
-                "compare_30.md: надёжность на 30 сценариях (python -m ngk_sim compare --runs 30)"))
     pr = _read(os.path.join(folder, "gate_protocol.md"))
     if pr is None:
         out.append((False, f"нет {folder}/gate_protocol.md"))
         return out
+    s1 = re.search(r"## 1\.(.*?)\n## 2\.", pr, re.S)
+    s1_rows = [ln for ln in (s1.group(1) if s1 else "").splitlines()
+               if ln.startswith("| ") and any(v.split(" ", 1)[1] in ln for v in VENDORS)]
+    s1_ok = sum(1 for ln in s1_rows if all(c.strip() for c in ln.strip().strip("|").split("|")[1:3]))
+    out.append((s1_ok == 4, f"Раздел 1: сводка из evidence/compare*.md ({s1_ok} из 4 подрядчиков)"))
     parts = re.split(r"\n### ", pr)
     for v in VENDORS:
         sec = next((p for p in parts if p.startswith(v)), "")

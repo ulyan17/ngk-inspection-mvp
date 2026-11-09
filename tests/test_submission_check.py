@@ -19,9 +19,9 @@ def _team(tmp):
 
 def test_filled_protocol_passes(tmp_path):
     _team(tmp_path)
-    (tmp_path / "compare.md").write_text("x", encoding="utf-8")
-    (tmp_path / "compare_30.md").write_text("x", encoding="utf-8")
     p = open(os.path.join(ROOT, "submission", "gate_protocol.md"), encoding="utf-8").read()
+    for v in ("А «Быстрый обход»", "Б «Надёжный»", "В «Сбалансированный»", "Г «Оптимальный маршрут»"):
+        p = p.replace(f"| {v} | | |", f"| {v} | 40% | 50% |")
     p = p.replace("**Измерения показали:** ______", "**Измерения показали:** " + LONG)
     p = p.replace("**Почему (причина и доказательство):** ______", "**Почему (причина и доказательство):** " + LONG)
     p = p.replace("**Что подрядчику исправить:** ______", "**Что подрядчику исправить:** добавить повтор точки")
