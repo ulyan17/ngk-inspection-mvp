@@ -646,6 +646,6 @@ def run_mission(ctx):
 
 ## Что записать в протокол
 
-В [`submission/gate_protocol.md`](../../submission/gate_protocol.md), раздел этого подрядчика:
+В Word-шаблоне протокола ([⬇️ gate_protocol.docx](https://github.com/ulyan17/ngk-inspection-mvp/raw/main/submission/gate_protocol.docx)), страница этого подрядчика:
 - **Измерения показали** — цифры из [compare.md](../compare.md) и [compare_30.md](../compare_30.md);
 - **Почему** — по формуле «файл → что в нём видно → вывод», например: «seed N, карта → …», «замеры seed N, K… → …», «код, строка … → …».

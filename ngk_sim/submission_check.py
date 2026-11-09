@@ -1,7 +1,8 @@
 """Проверка документов перед сдачей.
 
-    python -m ngk_sim check-submission              # занятие: submission/ (протокол ворот)
     python -m ngk_sim check-submission --homework   # домашнее задание: homework/
+
+Протокол занятия сдаётся в Word (submission/gate_protocol.docx) и проверяется преподавателем.
 """
 from __future__ import annotations
 
@@ -100,7 +101,11 @@ def check_homework(folder: str = "homework") -> list[tuple[bool, str]]:
 
 
 def main(folder: str | None = None, homework: bool = False) -> int:
-    res = check_homework(folder or "homework") if homework else check(folder or "submission")
+    if not homework:
+        print("Протокол занятия сдаётся в Word: submission/gate_protocol.docx.\n"
+              "Для домашнего задания: python -m ngk_sim check-submission --homework")
+        return 0
+    res = check_homework(folder or "homework")
     for ok, text in res:
         print(("✅ " if ok else "❌ ") + text)
     good = all(ok for ok, _ in res)

@@ -152,7 +152,7 @@ def build_vendor(L: str, claims: dict, tmp: str) -> None:
     parts.append("""
 ## Что записать в протокол
 
-В [`submission/gate_protocol.md`](../../submission/gate_protocol.md), раздел этого подрядчика:
+В Word-шаблоне протокола ([⬇️ gate_protocol.docx](https://github.com/ulyan17/ngk-inspection-mvp/raw/main/submission/gate_protocol.docx)), страница этого подрядчика:
 - **Измерения показали** — цифры из [compare.md](../compare.md) и [compare_30.md](../compare_30.md);
 - **Почему** — по формуле «файл → что в нём видно → вывод», например: «seed N, карта → …», «замеры seed N, K… → …», «код, строка … → …».
 """)
@@ -170,7 +170,7 @@ def build_index(claims: dict) -> None:
 
 [← к уроку](../README.md)
 
-На занятии **ничего не запускаем**. Все прогоны уже записаны: гифки, карты, логи, замеры датчиков и код. Вы открываете эти страницы прямо на GitHub и заполняете [протокол ворот](../submission/gate_protocol.md).
+На занятии **ничего не запускаем**. Все прогоны уже записаны: гифки, карты, логи, замеры датчиков и код. Вы открываете эти страницы прямо на GitHub и заполняете Word-шаблон протокола: [⬇️ gate_protocol.docx](https://github.com/ulyan17/ngk-inspection-mvp/raw/main/submission/gate_protocol.docx).
 
 ## Подрядчики
 
