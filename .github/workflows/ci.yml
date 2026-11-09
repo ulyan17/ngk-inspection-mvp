@@ -5,7 +5,8 @@ on:
   pull_request:
 
 jobs:
-  check:
+  code:
+    name: Код и тесты
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,3 +36,15 @@ jobs:
         with:
           name: mission-out
           path: out/
+
+  submission:
+    name: Сдача (submission/)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - name: Отчёты команды заполнены
+        run: python -m ngk_sim check-submission

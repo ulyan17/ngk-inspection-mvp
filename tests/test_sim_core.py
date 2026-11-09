@@ -44,6 +44,6 @@ def test_validator_rejects_garbage():
 
 
 def test_accept_writes_gate_table(impl, tmp_path):
-    res = accept([3, 4], impl=impl, out_dir=str(tmp_path))
+    res = accept([3, 4], impl=impl, out_dir=str(tmp_path), copy_to_submission=False)
     text = (tmp_path / "gate_kpi.md").read_text(encoding="utf-8")
     assert "Покрытие" in text and "seed 3" in text and res["path"].endswith("gate_kpi.md")
