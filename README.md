@@ -4,7 +4,9 @@
 
 **Без ROS.** Всё работает на чистом Python под Windows, macOS и Linux. Имена топиков и API навигатора — как в ROS 2 / Nav2, поэтому дома код переносится на настоящий стек (папка `ros2_homework/`).
 
-![карта](docs/world.png)
+![Как всё работает](docs/how-it-works.png)
+
+📘 **Лекция:** [docs/LECTURE.md](docs/LECTURE.md) · 🛠 **Практика пошагово:** [docs/PRACTICE.md](docs/PRACTICE.md) · 🗺 [карта объекта](docs/world.png)
 
 ## Быстрый старт (5 минут)
 
